@@ -11,8 +11,8 @@ export const initiateSuperAdmin = async () => {
     password: "123456",
     role: UserRole.ADMIN,
     uniqueId: "superadmin",
-    gender:Gender.MALE,
-    phoneNumber:"+8801755876658",
+    gender: Gender.MALE,
+    phoneNumber: "+8801755876658",
     db: "1997-01-12T06:48:45.050Z",
   };
 
@@ -29,14 +29,12 @@ export const initiateSuperAdmin = async () => {
       id: payload.id,
       username: payload.username,
       email: payload.email,
-      fcmToken: "",
-      isVerify:true,
-      role:payload.role,
-      uniqueId: payload.uniqueId,
-      phoneNumber:payload.phoneNumber,
+      isVerify: true,
+      role: payload.role,
+      phoneNumber: payload.phoneNumber,
       provider: AuthProvider.EMAIL,
-      dateOfBirth:payload.db,
-      password:hashedPassword
+      dateOfBirth: payload.db,
+      password: hashedPassword,
     },
   });
 };

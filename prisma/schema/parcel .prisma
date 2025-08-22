@@ -1,30 +1,34 @@
 model Parcel {
-    id                  String        @id @default(uuid())
-    code                String        @unique
-    customer            User          @relation("CustomerParcels", fields: [customerId], references: [id])
+    id                  String          @id @default(uuid())
+    code                String          @unique
+    customer            User            @relation("CustomerParcels", fields: [customerId], references: [id])
     customerId          String
-    agent               User?         @relation("AgentParcels", fields: [agentId], references: [id])
+    agent               User?           @relation("AgentParcels", fields: [agentId], references: [id])
     agentId             String?
-    pickupLocation      Json
-    dropoffLocation     Json
+    pickupLocation      Json            @db.Json
+    dropoffLocation     Json            @db.Json
     pickupContactName   String?
     pickupContactPhone  String?
     dropoffContactName  String?
     dropoffContactPhone String?
+    currentLocation     Json?           @db.Json
     type                String?
     weight              Float?
     sizeCategory        String?
-    paymentMode         PAYMENT_MODE
-    codAmount           Float?        @default(0)
-    deliveryFee         Float?        @default(0)
-    totalAmount         Float?        @default(0)
-    status              PARCEL_STATUS @default(UNASSIGNED)
+    qrCode              String?
+    barcode             String?
+    paymentMode         PAYMENT_MODE    @default(COD)
+    codAmount           Float?          @default(0)
+    deliveryFee         Float?          @default(0)
+    totalAmount         Float?          @default(0)
+    status              PARCEL_STATUS   @default(UNASSIGNED)
+    isActive            Boolean         @default(true)
     failedReason        String?
     assignedAt          DateTime?
-    assignedBy          String?
     deliveredAt         DateTime?
-    createdAt           DateTime      @default(now())
-    updatedAt           DateTime      @updatedAt
+    createdAt           DateTime        @default(now())
+    updatedAt           DateTime        @updatedAt
+    ParcelHistory       ParcelHistory[]
 
     @@index([customerId])
     @@index([agentId])
@@ -33,6 +37,20 @@ model Parcel {
     @@index([createdAt])
     @@index([updatedAt])
     @@map("parcels")
+}
+
+model ParcelHistory {
+    id        String        @id @default(uuid())
+    parcel    Parcel        @relation(fields: [parcelId], references: [id])
+    parcelId  String
+    status    PARCEL_STATUS
+    location  Json?
+    note      String?
+    createdAt DateTime      @default(now())
+
+    @@index([parcelId])
+    @@index([status])
+    @@map("parcel_histories")
 }
 
 enum PAYMENT_MODE {

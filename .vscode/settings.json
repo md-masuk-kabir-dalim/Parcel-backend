@@ -13,8 +13,11 @@
     "otps",
     "sslcommerz",
     "sslcz",
+    "superadmin",
+    "WITHSCORES",
     "zadd",
     "zcard",
+    "zrevrange",
     "zset"
   ]
 }

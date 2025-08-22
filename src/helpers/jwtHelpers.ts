@@ -12,7 +12,6 @@ interface JwtPayloadBase {
   phoneNumber?: string;
   role?: string;
   username?: string;
-  businessCategory?: string;
   otpType?: string;
 }
 
