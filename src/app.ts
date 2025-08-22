@@ -4,7 +4,6 @@ import { ExpressAdapter } from "@bull-board/express";
 import { PrismaClient } from "@prisma/client";
 import cors from "cors";
 import express, { NextFunction, Request, Response } from "express";
-import mongoSanitize from "express-mongo-sanitize";
 import helmet from "helmet";
 import hpp from "hpp";
 import compression from "compression";
@@ -45,7 +44,6 @@ app.use(
     contentSecurityPolicy: false,
   })
 );
-app.use(mongoSanitize());
 app.use(hpp());
 app.use(cors(corsOptions));
 app.use(compression());
@@ -76,21 +74,6 @@ createBullBoard({
 
 // Mount the dashboard
 app.use("/admin/queues", serverAdapter.getRouter());
-
-app.get("/payment/success", (req, res) => {
-  const { transitionId } = req.query;
-  res.render("payment-success", { transitionId });
-});
-
-app.get("/payment/fail", (req, res) => {
-  const { transitionId } = req.query;
-  res.render("payment-failed", { transitionId });
-});
-
-app.get("/payment/cancel", (req: Request, res: Response) => {
-  const { transitionId } = req.query;
-  res.render("payment-cancelled", { transitionId });
-});
 
 // Router setup
 app.use("/api/v1", router);
