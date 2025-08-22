@@ -3,7 +3,6 @@ import express from "express";
 import { fileUploader } from "../../../helpers/fileUploader";
 import { apiKeyMiddleware } from "../../middlewares/apiKeyMiddleware";
 import auth from "../../middlewares/auth";
-import { parseBodyData } from "../../middlewares/parseBodyData";
 import validateRequest from "../../middlewares/validateRequest";
 import { UserControllers } from "./user.controller";
 import { userValidation } from "./user.validation";
@@ -19,26 +18,6 @@ router
     UserControllers.createUser
   )
   .get(apiKeyMiddleware, auth(), UserControllers.getUsers);
-
-router
-  .route("/doctor")
-  .post(
-    apiKeyMiddleware,
-    fileUploader.doctorFileUploader,
-    parseBodyData,
-    validateRequest(userValidation.DoctorCreateSchema),
-    UserControllers.createDoctor
-  )
-  .get(apiKeyMiddleware, auth(), UserControllers.getDoctorList);
-
-router
-  .route("/doctor/:id")
-  .get(apiKeyMiddleware, auth(), UserControllers.getSingleDoctor)
-  .patch(
-    apiKeyMiddleware,
-    auth(UserRole.ADMIN),
-    UserControllers.doctorStatusUpdate
-  );
 
 router
   .route("/:id")

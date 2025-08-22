@@ -1,5 +1,5 @@
 {
-  "name": "h.d_care-backend",
+  "name": "parcel-backend",
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
@@ -12,7 +12,7 @@
   "keywords": [],
   "author": "dalim_kazi",
   "license": "ISC",
-  "description": "h.d_care-backend",
+  "description": "parcel-backend",
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
     "@types/compression": "^1.8.1",

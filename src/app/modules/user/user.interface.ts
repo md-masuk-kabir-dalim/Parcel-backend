@@ -9,12 +9,3 @@ export interface IUser {
   password: string;
   isVerify?: boolean;
 }
-
-export interface IUpdateUser {
-  firstName: string;
-  lastName?: string;
-  mobile?: string;
-  avatar?: string;
-  role?: UserRole;
-  status?: UserStatus;
-}

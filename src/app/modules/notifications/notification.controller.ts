@@ -5,7 +5,10 @@ import { notificationServices } from "./notification.service";
 
 const getNotificationsFrom = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user.id as string;
-  const result = await notificationServices.getNotificationsFromDB(userId);
+  const result = await notificationServices.getNotificationsFromDB(
+    userId,
+    req.query
+  );
 
   sendResponse(res, {
     statusCode: 200,
@@ -14,7 +17,6 @@ const getNotificationsFrom = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
-
 
 export const notificationController = {
   getNotificationsFrom,

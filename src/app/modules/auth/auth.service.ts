@@ -54,19 +54,6 @@ const loginWithPassword = async (payload: LoginPayload) => {
     );
   }
 
-  if (fcmToken) {
-    setImmediate(async () => {
-      try {
-        await prisma.user.update({
-          where: { id: user.id },
-          data: { fcmToken },
-        });
-      } catch (err) {
-        console.log("Failed to update FCM token:", err);
-      }
-    });
-  }
-
   const accessToken = jwtHelpers.generateJwtToken(
     {
       id: user.id,
@@ -81,50 +68,6 @@ const loginWithPassword = async (payload: LoginPayload) => {
 
   return {
     role: user.role,
-    accessToken,
-  };
-};
-
-const adminLoginIntoDB = async (payload: {
-  email: string;
-  password: string;
-}) => {
-  const normalizedEmail = payload?.email?.trim().toLowerCase();
-  const user = await prisma.user.findUnique({
-    where: {
-      email: normalizedEmail,
-    },
-  });
-
-  if (!user) {
-    throw new ApiError(httpStatus.BAD_REQUEST, "Account not found");
-  }
-
-  const isPasswordValid = await bcrypt.compare(
-    payload.password,
-    user?.password
-  );
-
-  if (!isPasswordValid) {
-    throw new ApiError(
-      httpStatus.UNAUTHORIZED,
-      "Invalid email or password. Please try again."
-    );
-  }
-
-  const accessToken = jwtHelpers.generateJwtToken(
-    {
-      id: user.id,
-      email: user.email,
-      phoneNumber: user.phoneNumber,
-      role: user?.role,
-      username: user.username,
-    },
-    TokenType.ACCESS_TOKEN,
-    config.jwt.expires_in as SignOptions["expiresIn"]
-  );
-
-  return {
     accessToken,
   };
 };
@@ -281,10 +224,6 @@ const verifyOtpCodeDB = async (
     ]);
   });
 
-  if (userData.status !== UserStatus.ACTIVE) {
-    throw new ApiError(httpStatus.FORBIDDEN, "Your account is not active.");
-  }
-
   const token = jwtHelpers.generateJwtToken(
     {
       id: userData.id,
@@ -346,7 +285,6 @@ const getProfileFromDB = async (userId: string) => {
       address: true,
       gender: true,
       dateOfBirth: true,
-      bloodGroup: true,
       phoneNumber: true,
       email: true,
     },
@@ -398,7 +336,6 @@ export const authService = {
   updateProfileIntoDB,
   sendOtpIntoDB,
   verifyOtpCodeDB,
-  adminLoginIntoDB,
   updateProfileImageIntoDB,
   resetPasswordIntoDB,
   deleteAccount,

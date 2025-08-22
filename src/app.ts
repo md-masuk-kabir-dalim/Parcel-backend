@@ -14,7 +14,6 @@ import GlobalErrorHandler from "./app/middlewares/globalErrorHandler";
 import { xssSanitizerMiddleware } from "./app/middlewares/sanitizeInput";
 import router from "./app/routes";
 import { messagePersistenceQueue, otpQueue } from "./helpers/redis";
-import { paymentController } from "./app/modules/payment/payment.controller";
 const app: express.Express = express();
 const prisma = new PrismaClient();
 app.disable("x-powered-by");
@@ -30,12 +29,6 @@ const corsOptions = {
   allowedHeaders: ["Content-Type", "Authorization", "x-api-key"],
   credentials: true,
 };
-
-app.post(
-  "/webhook",
-  express.urlencoded({ extended: true }),
-  paymentController.paymentWebhook
-);
 
 // Middleware setup
 prisma

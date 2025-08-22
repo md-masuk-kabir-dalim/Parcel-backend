@@ -15,21 +15,14 @@ const loginUser = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const adminLoginUser = catchAsync(async (req: Request, res: Response) => {
-  const result = await authService.adminLoginIntoDB(req.body);
-
-  sendResponse(res, {
-    statusCode: 200,
-    success: true,
-    message: "Admin successfully logged in",
-    data: result,
-  });
-});
-
 const sendOtpCode = catchAsync(async (req: Request, res: Response) => {
   const { identify, otpType, deliveryType } = req.body;
 
-  const response = await authService.sendOtpIntoDB(identify, otpType,deliveryType);
+  const response = await authService.sendOtpIntoDB(
+    identify,
+    otpType,
+    deliveryType
+  );
   sendResponse(res, {
     statusCode: 200,
     success: true,
@@ -115,7 +108,6 @@ const deleteAccount = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-
 export const authController = {
   loginUser,
   getProfile,
@@ -123,7 +115,6 @@ export const authController = {
   sendOtpCode,
   verifyOtpCode,
   updateProfileImage,
-  adminLoginUser,
   resetPassword,
   deleteAccount,
 };

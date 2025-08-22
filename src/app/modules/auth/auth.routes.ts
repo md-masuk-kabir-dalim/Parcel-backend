@@ -17,12 +17,6 @@ router.post(
 );
 
 router.post(
-  "/admin/login",
-  apiKeyMiddleware,
-  authController.adminLoginUser
-);
-
-router.post(
   "/otp/send",
   apiKeyMiddleware,
   validateRequest(authValidation.sendOtpSchema),
@@ -51,18 +45,10 @@ router.patch(
   authController.updateProfileImage
 );
 
-router.route("/me").get(
-  apiKeyMiddleware,
-  auth(),
-  authController.getProfile
-).patch(
-  apiKeyMiddleware,
-  auth(),
-  authController.updateProfile
-).delete(
-  apiKeyMiddleware,
-  auth(),
-  authController.deleteAccount
-);
+router
+  .route("/me")
+  .get(apiKeyMiddleware, auth(), authController.getProfile)
+  .patch(apiKeyMiddleware, auth(), authController.updateProfile)
+  .delete(apiKeyMiddleware, auth(), authController.deleteAccount);
 
 export const authRoute = router;

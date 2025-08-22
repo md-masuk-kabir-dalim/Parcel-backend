@@ -21,7 +21,7 @@ model User {
     user2Conversion  Conversation[]   @relation("User2Conversion")
     createdAt        DateTime         @default(now())
     updatedAt        DateTime         @updatedAt
-    Otp              Otp?
+    otp              Otp?
 
     @@index([isVerify])
     @@index([gender])
