@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Payment Cancelled</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: "Roboto", sans-serif;
+        background: linear-gradient(135deg, #fff3cd, #ffeeba);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+      }
+      .card {
+        background: #fff;
+        padding: 50px 35px;
+        border-radius: 15px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        text-align: center;
+        max-width: 450px;
+        width: 90%;
+      }
+      .icon {
+        font-size: 60px;
+        color: #856404;
+        margin-bottom: 20px;
+        animation: shake 0.5s ease-in-out 0s 2;
+        display: inline-block;
+      }
+      @keyframes shake {
+        0% {
+          transform: translateX(0);
+        }
+        25% {
+          transform: translateX(-5px);
+        }
+        50% {
+          transform: translateX(5px);
+        }
+        75% {
+          transform: translateX(-5px);
+        }
+        100% {
+          transform: translateX(0);
+        }
+      }
+      h1 {
+        color: #856404;
+        font-size: 28px;
+        margin-bottom: 15px;
+      }
+      p {
+        font-size: 16px;
+        color: #555;
+        margin-bottom: 12px;
+      }
+      .transaction {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 25px;
+      }
+      a.button {
+        display: inline-block;
+        text-decoration: none;
+        background: #856404;
+        color: #fff;
+        padding: 14px 30px;
+        border-radius: 10px;
+        font-weight: 600;
+        transition: 0.3s;
+      }
+      a.button:hover {
+        background: #6c5d02;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      }
+      @media (max-width: 480px) {
+        .card {
+          padding: 40px 25px;
+        }
+        h1 {
+          font-size: 24px;
+        }
+        .icon {
+          font-size: 50px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="icon">⚠️</div>
+      <h1>Payment Cancelled</h1>
+      <p>Oops! You have cancelled the payment process.</p>
+      <a href="/" class="button">Go back to Home</a>
+    </div>
+  </body>
+</html>
