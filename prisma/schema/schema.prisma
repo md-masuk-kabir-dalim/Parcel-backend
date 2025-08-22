@@ -26,4 +26,6 @@ enum NotificationStatus {
   UNREAD
   READ
   ARCHIVED
+  PARCEL_STATUS
+  PARCEL_ASSIGN
 }

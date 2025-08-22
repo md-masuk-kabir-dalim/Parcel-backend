@@ -45,7 +45,19 @@ const getNotificationsFromDB = async (receiverId: string, query: any) => {
   });
 };
 
+const getNotificationsCount = async (receiverId: string) => {
+  const count = await prisma.notifications.count({
+    where: {
+      receiverId: receiverId,
+    },
+  });
+  return {
+    count,
+  };
+};
+
 export const notificationServices = {
   sendSingleNotification,
   getNotificationsFromDB,
+  getNotificationsCount,
 };

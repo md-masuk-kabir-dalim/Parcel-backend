@@ -1,9 +1,16 @@
-import { Parcel, PARCEL_STATUS, Prisma, UserRole } from "@prisma/client";
+import {
+  NotificationStatus,
+  Parcel,
+  PARCEL_STATUS,
+  Prisma,
+  UserRole,
+} from "@prisma/client";
 import ApiError from "../../../errors/ApiErrors";
 import prisma from "../../../shared/prisma";
 import searchAndPaginate from "../../../helpers/searchAndPaginate";
 import { ParcelInput } from "./parcel.validation";
 import { generateUniqueId } from "../../utils/generateUniqueId";
+import { notificationServices } from "../notifications/notification.service";
 
 const createParcel = async (data: ParcelInput, customerId: string) => {
   const parcelId = generateUniqueId();
@@ -76,18 +83,23 @@ const getSingleParcel = async (id: string) => {
 
 const updateParcelStatus = async (
   id: string,
-  data: Partial<{ status: PARCEL_STATUS }>,
+  data: Partial<{
+    status: PARCEL_STATUS;
+    currentLocation?: any;
+    assignId?: string;
+  }>,
   userRole: UserRole,
   currentUserId: string
 ) => {
   const parcel = await prisma.parcel.findUnique({ where: { id } });
   if (!parcel) throw new ApiError(404, "Parcel not found");
 
-  // Only Admin or assigned Agent can update
-  if (userRole === UserRole.CUSTOMER && parcel.customerId !== currentUserId) {
-    throw new ApiError(403, "Not allowed");
+  // Only Admin can assign agent
+  if (data.status === PARCEL_STATUS.ASSIGNED && userRole !== UserRole.ADMIN) {
+    throw new ApiError(403, "Only admin can assign parcel to agent");
   }
 
+  // Delivery agent can only update own parcels
   if (
     userRole === UserRole.DELIVERY_AGENT &&
     parcel.agentId !== currentUserId
@@ -95,23 +107,54 @@ const updateParcelStatus = async (
     throw new ApiError(403, "Not allowed");
   }
 
-  const updated = await prisma.parcel.update({
-    where: { id },
-    data,
-  });
+  const updateData: any = { ...data };
 
-  // Add history entry
+  const historyEntries: any[] = [];
   if (data.status) {
-    await prisma.parcelHistory.create({
-      data: {
-        parcelId: id,
-        status: data.status,
-        note: `Status changed by ${userRole}`,
-      },
+    historyEntries.push({
+      status: data.status,
+      note: `Status changed by ${userRole.toLowerCase()}`,
+      location: data.currentLocation || null,
     });
   }
 
-  return updated;
+  // If admin assigns agent
+  if (data.assignId) {
+    updateData.agentId = data.assignId;
+    historyEntries.push({
+      status: PARCEL_STATUS.ASSIGNED,
+      note: `Parcel assigned to agent by ${userRole.toLowerCase()}`,
+    });
+  }
+
+  if (historyEntries.length) {
+    updateData.ParcelHistory = { create: historyEntries };
+  }
+
+  await prisma.parcel.update({
+    where: { id },
+    data: updateData,
+  });
+
+  if (data.status && data.status !== PARCEL_STATUS.ASSIGNED) {
+    await notificationServices.sendSingleNotification({
+      receiverId: parcel.customerId,
+      title: "Parcel Status Updated",
+      body: `Your parcel is now ${data.status.toLowerCase()}`,
+      type: NotificationStatus.PARCEL_STATUS,
+    });
+  }
+
+  if (data.assignId) {
+    await notificationServices.sendSingleNotification({
+      receiverId: data.assignId,
+      title: "New Parcel Assigned",
+      body: `You have been assigned a new parcel: ${parcel.parcelId}`,
+      type: NotificationStatus.PARCEL_ASSIGN,
+    });
+  }
+
+  return;
 };
 
 const deleteParcel = async (id: string) => {

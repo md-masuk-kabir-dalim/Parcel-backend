@@ -26,6 +26,7 @@ export enum MessageTypes {
   AUTH_FAILURE = "authFailure",
   FAILURE = "Failure",
   JOIN_APP = "joinApp",
+  AGENT_LOCATION_UPDATE = "agentLocationUpdate",
 }
 
 const MAX_REDIS_MESSAGES = 5;

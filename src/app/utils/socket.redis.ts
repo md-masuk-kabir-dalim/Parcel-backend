@@ -1,6 +1,5 @@
 import { redis } from "../../helpers/redis";
 import prisma from "../../shared/prisma";
-const MAX_CONVERSATIONS = 15;
 
 const storeUserConnection = async (userId: string) => {
   const user = await prisma.user.findUnique({
@@ -75,9 +74,31 @@ const getConversationObject = async (
   return conversation;
 };
 
+const updateAgentLocation = async (
+  agentId: string,
+  lat: number,
+  lng: number
+) => {
+  const location = { lat, lng, updatedAt: new Date().toISOString() };
+  await redis.set(
+    `agent:${agentId}:location`,
+    JSON.stringify(location),
+    "EX",
+    300
+  ); // expire 5 min
+};
+
+const getAgentLocation = async (agentId: string) => {
+  const data = await redis.get(`agent:${agentId}:location`);
+  if (!data) return null;
+  return JSON.parse(data);
+};
+
 export const redisSocketService = {
   storeUserConnection,
   getUserDetails,
   removeUserConnection,
   getConversationObject,
+  updateAgentLocation,
+  getAgentLocation,
 };

@@ -8,6 +8,7 @@
     "hget",
     "hgetall",
     "hincrby",
+    "hmset",
     "kazi",
     "lrange",
     "otps",
@@ -17,6 +18,7 @@
     "WITHSCORES",
     "zadd",
     "zcard",
+    "zremrangebyrank",
     "zrevrange",
     "zset"
   ]

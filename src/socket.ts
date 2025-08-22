@@ -1,5 +1,4 @@
 import { WebSocketServer } from "ws";
-import { chatService } from "./app/modules/chat/chat.service";
 import {
   handleJoinApp,
   handleJoinPrivateChat,
@@ -12,6 +11,7 @@ import {
 } from "./app/utils/socket.helpers";
 import startKeepAlive from "./app/utils/startKeepAlive";
 import { validateToken } from "./app/utils/validateToken";
+import { redisSocketService } from "./app/utils/socket.redis";
 
 export const activeUsers = new Map<string, ExtendedWebSocket>();
 
@@ -45,90 +45,22 @@ export default function socketConnect(server: any) {
           case MessageTypes.SEND_PRIVATE_MESSAGE:
             await handleSendPrivateMessage(ws, parsedData);
             break;
-          case MessageTypes.MESSAGE_LIST: {
-            try {
-              const {
-                conversationId,
-                page = 1,
-                limit = 10,
-                userId: user1Id,
-              } = parsedData;
-
-              if (!conversationId || !user1Id) {
-                ws.send(
-                  JSON.stringify({
-                    type: MessageTypes.FAILURE,
-                    message:
-                      "Missing required fields: conversationId or userId",
-                  })
-                );
-                break;
-              }
-
-              const messageList = await chatService.getMergedMessageList(
-                conversationId,
-                Number(page),
-                Number(limit)
-              );
-
-              const receiverSocket = activeUsers.get(user1Id);
-
-              if (receiverSocket) {
-                receiverSocket.send(
-                  JSON.stringify({
-                    type: MessageTypes.CONVERSATION_LIST,
-                    messageList,
-                  })
-                );
-              } else {
-                ws.send(
-                  JSON.stringify({
-                    type: MessageTypes.FAILURE,
-                    message: `User socket not found for userId: ${user1Id}`,
-                  })
-                );
-              }
-            } catch (error) {
-              ws.send(
-                JSON.stringify({
-                  type: MessageTypes.FAILURE,
-                  message:
-                    error instanceof Error
-                      ? error.message
-                      : "Unknown error occurred",
-                })
-              );
-            }
+          case MessageTypes.AGENT_LOCATION_UPDATE: {
+            const { lat, lng } = parsedData;
+            await redisSocketService.updateAgentLocation(
+              parsedData.userId,
+              lat,
+              lng
+            );
+            ws.send(
+              JSON.stringify({
+                type: MessageTypes.AGENT_LOCATION_UPDATE,
+                lat: 23.8103,
+                lng: 90.4125,
+              })
+            );
             break;
           }
-
-          case MessageTypes.CONVERSATION_LIST:
-            try {
-              const { userId, page = 1, limit = 10 } = parsedData;
-              const conversationList =
-                await chatService.getConversationListIntoDB(
-                  userId,
-                  Number(page),
-                  Number(limit)
-                );
-              const receiverSocket = activeUsers.get(userId);
-              if (receiverSocket) {
-                receiverSocket.send(
-                  JSON.stringify({
-                    type: MessageTypes.CONVERSATION_LIST,
-                    conversationList,
-                  })
-                );
-              }
-            } catch (error) {
-              ws.send(
-                JSON.stringify({
-                  type: MessageTypes.FAILURE,
-                  message: error,
-                })
-              );
-            }
-            break;
 
           default:
             console.log("Unknown WebSocket message types:", parsedData.type);
