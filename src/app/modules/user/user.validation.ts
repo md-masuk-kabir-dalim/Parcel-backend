@@ -23,7 +23,7 @@ const userRegisterValidationSchema = z.object({
     required_error: "User role is required",
     invalid_type_error: "Invalid user role",
   }),
-  phoneNumber: phoneNumberSchema,
+  phoneNumber: z.string(),
   password: z.string({
     required_error: "Password is required",
     invalid_type_error: "Password must be a string",

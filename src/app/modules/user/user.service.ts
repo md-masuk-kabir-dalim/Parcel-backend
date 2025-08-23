@@ -1,17 +1,43 @@
-import { AuthProvider, Prisma, User, UserRole } from "@prisma/client";
+import { AuthProvider, OtpType, Prisma, User, UserRole } from "@prisma/client";
 import bcrypt from "bcrypt";
 import httpStatus from "http-status";
 import ApiError from "../../../errors/ApiErrors";
 import searchAndPaginate from "../../../helpers/searchAndPaginate";
 import prisma from "../../../shared/prisma";
 import { generateUUID } from "../../utils/generateUUID";
+import generateAndQueueOtp from "../../../helpers/generate.queue.otp";
+import { jwtHelpers, TokenType } from "../../../helpers/jwtHelpers";
+import { SignOptions } from "jsonwebtoken";
 
 const handleExistingUserVerification = async (
   user: User,
   conflictMessage: string
 ) => {
   if (!user.isVerify) {
-    return;
+    const otpCode = await generateAndQueueOtp({
+      user,
+      identifier: user.email,
+      otpType: OtpType.EMAIL_VERIFICATION,
+    });
+
+    const verifyToken = jwtHelpers.generateJwtToken(
+      {
+        id: user.id,
+        email: user.email,
+        phoneNumber: user.phoneNumber,
+        role: user.role,
+        username: user.username,
+        otpType: OtpType.EMAIL_VERIFICATION,
+      },
+      TokenType.VERIFICATION,
+      "5m" as SignOptions["expiresIn"]
+    );
+
+    return {
+      otpCode,
+      verifyToken,
+      role: user?.role,
+    };
   }
   throw new ApiError(httpStatus.CONFLICT, `${conflictMessage} already exists!`);
 };
@@ -41,7 +67,7 @@ const createUserIntoDB = async (payload: User) => {
   const hashedPassword = await bcrypt.hash(payload.password as string, 4);
   const userId = generateUUID();
 
-  await prisma.user.create({
+  const user = await prisma.user.create({
     data: {
       id: userId,
       username: payload.username,
@@ -53,7 +79,30 @@ const createUserIntoDB = async (payload: User) => {
     },
   });
 
-  return;
+  const otpCode = await generateAndQueueOtp({
+    user,
+    identifier: user.email,
+    otpType: OtpType.EMAIL_VERIFICATION,
+  });
+
+  const verifyToken = jwtHelpers.generateJwtToken(
+    {
+      id: user.id,
+      email: user.email,
+      phoneNumber: user.phoneNumber,
+      role: user.role,
+      username: user.username,
+      otpType: OtpType.EMAIL_VERIFICATION,
+    },
+    TokenType.VERIFICATION,
+    "5m" as SignOptions["expiresIn"]
+  );
+
+  return {
+    otpCode,
+    verifyToken,
+    role: user?.role,
+  };
 };
 
 const getSingleUserIntoDB = async (id: string) => {

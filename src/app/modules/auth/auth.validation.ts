@@ -17,12 +17,10 @@ const authLoginSchema = z.object({
       invalid_type_error: "Email must be a string",
     })
     .email("Please enter a valid email address"),
-  phoneNumber:phoneNumberSchema,
   password: z.string({
     required_error: "Password is required",
     invalid_type_error: "Password must be a string",
   }),
-  fcmToken: z.string().optional(),
 });
 
 

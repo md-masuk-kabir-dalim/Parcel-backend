@@ -1,4 +1,4 @@
-import { AuthProvider, OtpType, User, UserStatus } from "@prisma/client";
+import { OtpType, User, UserStatus } from "@prisma/client";
 import bcrypt from "bcrypt";
 import httpStatus from "http-status";
 import { SignOptions } from "jsonwebtoken";
@@ -21,15 +21,12 @@ enum OtpDeliveryType {
 }
 
 const loginWithPassword = async (payload: LoginPayload) => {
-  const { email, phoneNumber, password, fcmToken } = payload;
+  const { email, password } = payload;
   const normalizedEmail = email?.trim().toLowerCase();
 
-  const [userByEmail, userByPhone] = await Promise.all([
-    prisma.user.findUnique({ where: { email: normalizedEmail } }),
-    prisma.user.findUnique({ where: { phoneNumber } }),
-  ]);
-
-  const user = userByEmail || userByPhone;
+  const user = await prisma.user.findUnique({
+    where: { email: normalizedEmail },
+  });
 
   if (!user) {
     throw new ApiError(
@@ -142,6 +139,7 @@ const sendOtpIntoDB = async (
   return {
     otpCode,
     verifyToken,
+    role: user?.role,
   };
 };
 
@@ -239,8 +237,8 @@ const verifyOtpCodeDB = async (
   );
 
   return otpType === OtpType.PASSWORD_RESET
-    ? { verifyToken: token }
-    : { accessToken: token };
+    ? { verifyToken: token, role: userData?.role }
+    : { accessToken: token, role: userData?.role };
 };
 
 const resetPasswordIntoDB = async (userId: string, newPassword: string) => {

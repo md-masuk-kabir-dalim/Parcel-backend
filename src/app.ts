@@ -22,7 +22,7 @@ const corsOptions = {
   origin: [
     "http://localhost:3000",
     "http://localhost:3001",
-    "http://182.48.70.209:3001",
+    "http://10.5.0.2:3000",
   ],
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization", "x-api-key"],
