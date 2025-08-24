@@ -11,6 +11,12 @@ import searchAndPaginate from "../../../helpers/searchAndPaginate";
 import { ParcelInput } from "./parcel.validation";
 import { generateUniqueId } from "../../utils/generateUniqueId";
 import { notificationServices } from "../notifications/notification.service";
+const notAllowed: PARCEL_STATUS[] = [
+  PARCEL_STATUS.ASSIGNED,
+  PARCEL_STATUS.DELIVERED,
+  PARCEL_STATUS.IN_TRANSIT,
+  PARCEL_STATUS.PICKED_UP,
+];
 
 const createParcel = async (data: ParcelInput, customerId: string) => {
   const parcelId = generateUniqueId();
@@ -33,6 +39,9 @@ const getAllParcels = async (
     ...(agentId && { agentId }),
     ...(query.status && { status: query.status }),
     ...(query.type && { type: query.type }),
+    ...(query.isHistory === "true" && {
+      status: { not: PARCEL_STATUS.UNASSIGNED },
+    }),
   };
 
   return await searchAndPaginate<
@@ -60,15 +69,16 @@ const getAllParcels = async (
       status: true,
       createdAt: true,
       updatedAt: true,
+      agentId: true,
       customer: { select: { id: true, username: true, avatar: true } },
       agent: { select: { id: true, username: true, avatar: true } },
     },
   });
 };
 
-const getSingleParcel = async (id: string) => {
+const getSingleParcel = async (parcelId: string) => {
   const parcel = await prisma.parcel.findUnique({
-    where: { id },
+    where: { parcelId },
     include: {
       customer: true,
       agent: true,
@@ -107,6 +117,10 @@ const updateParcelStatus = async (
     throw new ApiError(403, "Not allowed");
   }
 
+  if (data?.status === PARCEL_STATUS.ASSIGNED && !data.assignId) {
+    throw new ApiError(400, "Agent ID is required");
+  }
+
   const updateData: any = { ...data };
 
   const historyEntries: any[] = [];
@@ -121,6 +135,7 @@ const updateParcelStatus = async (
   // If admin assigns agent
   if (data.assignId) {
     updateData.agentId = data.assignId;
+    delete updateData.assignId;
     historyEntries.push({
       status: PARCEL_STATUS.ASSIGNED,
       note: `Parcel assigned to agent by ${userRole.toLowerCase()}`,
@@ -130,7 +145,7 @@ const updateParcelStatus = async (
   if (historyEntries.length) {
     updateData.ParcelHistory = { create: historyEntries };
   }
-
+  console.log(updateData);
   await prisma.parcel.update({
     where: { id },
     data: updateData,
@@ -158,7 +173,21 @@ const updateParcelStatus = async (
 };
 
 const deleteParcel = async (id: string) => {
-  return await prisma.parcel.delete({ where: { id } });
+  const parcel = await prisma.parcel.findUnique({
+    where: { id },
+  });
+
+  if (!parcel) {
+    throw new Error("Parcel not found");
+  }
+
+  if (notAllowed.includes(parcel.status)) {
+    throw new Error(`Cannot delete parcel with status: ${parcel.status}`);
+  }
+
+  return prisma.parcel.delete({
+    where: { id },
+  });
 };
 
 export const parcelService = {

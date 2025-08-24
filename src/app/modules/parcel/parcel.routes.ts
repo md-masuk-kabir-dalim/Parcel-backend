@@ -28,7 +28,7 @@ router
   )
   .delete(
     apiKeyMiddleware,
-    auth(UserRole.ADMIN),
+    auth(UserRole.ADMIN, UserRole.CUSTOMER),
     parcelController.deleteParcel
   );
 

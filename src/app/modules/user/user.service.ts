@@ -135,7 +135,9 @@ const getUsersIntoDB = async (
   searchQuery: string,
   role: UserRole
 ) => {
-  const additionalFilter: Prisma.UserWhereInput = {};
+  const additionalFilter: Prisma.UserWhereInput = {
+    isVerify: true,
+  };
 
   if (role) {
     additionalFilter.role = role;

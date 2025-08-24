@@ -4,6 +4,7 @@ import { chatRoute } from "../modules/chat/chat.routes";
 import { notificationRoute } from "../modules/notifications/notification.routes";
 import { userRoutes } from "../modules/user/user.route";
 import { parcelRoutes } from "../modules/parcel/parcel.routes";
+import { adminRoute } from "../modules/admin-analysis/admin-analysis.route";
 
 const router = express.Router();
 
@@ -28,6 +29,10 @@ const moduleRoutes = [
   {
     path: "/parcel",
     route: parcelRoutes,
+  },
+  {
+    path: "/admin",
+    route: adminRoute,
   },
 ];
 
