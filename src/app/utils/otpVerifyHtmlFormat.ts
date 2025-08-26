@@ -4,7 +4,7 @@ export const otpVerifyHtmlFormat = async (username: string, otp: string) => {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verify Your Spotless Kleen Account</title>
+    <title>Verify Your Parcel Account</title>
 </head>
 <body style="font-family: 'Arial', 'Helvetica', sans-serif; background-color: #f4f7fa; margin: 0; padding: 20px; line-height: 1.6;">
     <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);">
