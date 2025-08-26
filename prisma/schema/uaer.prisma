@@ -1,0 +1,80 @@
+model User {
+    id               String           @id @default(uuid())
+    provider         AuthProvider
+    email            String           @unique
+    phoneNumber      String           @unique
+    dateOfBirth      DateTime?
+    isVerify         Boolean          @default(false)
+    role             UserRole         @default(CUSTOMER)
+    status           UserStatus       @default(ACTIVE)
+    password         String
+    username         String
+    gender           Gender?
+    avatar           String?
+    address          String?
+    customerParcels  Parcel[]         @relation("CustomerParcels")
+    agentParcels     Parcel[]         @relation("AgentParcels")
+    notifications    Notifications[]
+    sentMessages     PrivateMessage[] @relation("SentMessages")
+    receivedMessages PrivateMessage[] @relation("ReceivedMessages")
+    user1Conversion  Conversation[]   @relation("User1Conversion")
+    user2Conversion  Conversation[]   @relation("User2Conversion")
+    createdAt        DateTime         @default(now())
+    updatedAt        DateTime         @updatedAt
+    otp              Otp?
+
+    @@index([isVerify])
+    @@index([gender])
+    @@index([role])
+    @@index([username])
+    @@index([provider])
+    @@index([status])
+    @@index([updatedAt])
+    @@index([createdAt])
+    @@map("users")
+}
+
+model Otp {
+    id         String   @id @default(uuid())
+    identifier String   @unique
+    otpCode    String   @unique
+    userId     String   @unique
+    expiresAt  DateTime
+    type       OtpType
+    user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    createdAt  DateTime @default(now())
+    updatedAt  DateTime @updatedAt
+
+    @@index([createdAt])
+    @@index([updatedAt])
+    @@map("otps")
+}
+
+enum AuthProvider {
+    EMAIL
+}
+
+enum OtpType {
+    EMAIL_VERIFICATION
+    PHONE_VERIFICATION
+    PASSWORD_RESET
+}
+
+enum UserStatus {
+    ACTIVE
+    DEACTIVATE
+    BLOCKED
+    DELETED
+}
+
+enum UserRole {
+    ADMIN
+    DELIVERY_AGENT
+    CUSTOMER
+}
+
+enum Gender {
+    MALE
+    FEMALE
+    OTHER
+}

@@ -1,0 +1,31 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Notifications {
+  id         String             @id @default(uuid())
+  receiverId String
+  body       Json
+  type       NotificationStatus
+  title      String
+  user       User               @relation(fields: [receiverId], references: [id], onDelete: Cascade)
+  createdAt  DateTime           @default(now())
+  updatedAt  DateTime           @updatedAt
+
+  @@index([receiverId])
+  @@index([type])
+  @@map("notifications")
+}
+
+enum NotificationStatus {
+  UNREAD
+  READ
+  ARCHIVED
+  PARCEL_STATUS
+  PARCEL_ASSIGN
+}

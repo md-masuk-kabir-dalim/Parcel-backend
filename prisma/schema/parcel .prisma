@@ -1,0 +1,87 @@
+model Parcel {
+    id                  String          @id @default(uuid())
+    parcelId            String          @unique
+    customer            User            @relation("CustomerParcels", fields: [customerId], references: [id])
+    customerId          String
+    agent               User?           @relation("AgentParcels", fields: [agentId], references: [id])
+    agentId             String?
+    pickupLocation      Json            @db.Json
+    dropoffLocation     Json            @db.Json
+    pickupContactName   String
+    pickupContactPhone  String
+    dropoffContactName  String
+    dropoffContactPhone String
+    currentLocation     Json?           @db.Json
+    type                PARCEL_TYPE
+    weight              Float?
+    sizeCategory        SIZE_CATEGORY
+    paymentMode         PAYMENT_MODE    @default(COD)
+    deliveryFee         Float?          @default(0)
+    totalAmount         Float?          @default(0)
+    status              PARCEL_STATUS   @default(UNASSIGNED)
+    isActive            Boolean         @default(true)
+    failedReason        String?
+    assignedAt          DateTime?
+    deliveredAt         DateTime?
+    createdAt           DateTime        @default(now())
+    updatedAt           DateTime        @updatedAt
+    ParcelHistory       ParcelHistory[]
+
+    @@index([customerId])
+    @@index([agentId])
+    @@index([status])
+    @@index([type])
+    @@index([createdAt])
+    @@index([updatedAt])
+    @@map("parcels")
+}
+
+model ParcelHistory {
+    id        String        @id @default(uuid())
+    parcel    Parcel        @relation(fields: [parcelId], references: [id])
+    parcelId  String
+    status    PARCEL_STATUS
+    location  Json?
+    note      String?
+    createdAt DateTime      @default(now())
+
+    @@index([parcelId])
+    @@index([status])
+    @@map("parcel_histories")
+}
+
+enum PAYMENT_MODE {
+    COD
+    PREPAID
+}
+
+enum PARCEL_STATUS {
+    UNASSIGNED
+    ASSIGNED
+    PICKED_UP
+    IN_TRANSIT
+    DELIVERED
+    FAILED
+}
+
+enum PARCEL_TYPE {
+    DOCUMENT
+    PACKAGE
+    FOOD
+    ELECTRONICS
+    CLOTHING
+    MEDICAL
+    FRAGILE
+    LIQUID
+    FURNITURE
+    COSMETICS
+    BOOKS
+    OTHER
+}
+
+enum SIZE_CATEGORY {
+    SMALL
+    MEDIUM
+    LARGE
+    EXTRA_LARGE
+}
